@@ -1,12 +1,44 @@
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/HLeZUs-R)
-# flutter-empty-2026
+# Space Shooter - Flame Tutorial
 
-Plantilla de flux de treball per recrear una estructura neta de projecte Flutter només amb:
+## 4b1. GameWidget y Game Loop
 
-- Plataforma Web
-- Plataforma Android
+### GameWidget
 
-Aquest README està pensat perquè puguis reiniciar el repositori a un estat mínim i regenerar els fitxers de plataforma necessaris de manera reproduïble.
+El **GameWidget** se encuentra en la **línea 11** del archivo `lib/main.dart`:
+
+```dart
+void main() {
+  runApp(GameWidget(game: SpaceShooterGame()));
+}
+```
+
+`GameWidget` es el widget de Flutter que actúa como puente entre Flutter y Flame. Se encarga de:
+- Integrar el juego Flame dentro del árbol de widgets de Flutter.
+- Renderizar el canvas del juego.
+- Redirigir los eventos de input (taps, drags, teclado) al juego.
+- Gestionar el ciclo de vida (pause/resume) del juego.
+
+Recibe como parámetro una instancia de `SpaceShooterGame`, que es la clase principal del juego.
+
+### Game Loop
+
+El **Game Loop no está definido explícitamente** en el código. Flame lo gestiona internamente a través de la clase `FlameGame` (de la cual `SpaceShooterGame` hereda en la **línea 14**):
+
+```dart
+class SpaceShooterGame extends FlameGame
+    with PanDetector, HasCollisionDetection {
+```
+
+`FlameGame` extiende `Game`, que implementa el game loop automáticamente. Este loop interno ejecuta en cada frame:
+
+1. **`update(double dt)`** → Actualiza la lógica de todos los componentes (movimiento, colisiones, spawns). El parámetro `dt` es el delta time entre frames. En este proyecto se usa en:
+   - `Bullet.update(dt)` (línea 139): mueve las balas hacia arriba (`position.y += dt * -500`).
+   - `Enemy.update(dt)` (línea 174): mueve los enemigos hacia abajo (`position.y += dt * 250`).
+
+2. **`render(Canvas canvas)`** → Dibuja todos los componentes en pantalla (parallax, player, balas, enemigos, explosiones).
+
+El game loop se inicia automáticamente cuando `GameWidget` se monta en el árbol de widgets de Flutter. No es necesario crearlo ni configurarlo manualmente.
 
 Aquest document s'ha fet amb l'ajuda de Copilot
 
