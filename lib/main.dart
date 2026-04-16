@@ -8,7 +8,34 @@ import 'package:flame/parallax.dart'; // Importa componente de efecto parallax (
 import 'package:flutter/material.dart'; // Importa componentes básicos de Flutter (UI)
 
 void main() { // Punto de entrada principal del programa
-  runApp(GameWidget(game: SpaceShooterGame())); // Inicia la app con el widget del juego
+  runApp(
+    GameWidget(
+      game: SpaceShooterGame(), // Instancia del juego
+      // loadingBuilder: muestra un widget mientras el juego carga (onLoad)
+      loadingBuilder: (context) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+      // backgroundBuilder: dibuja un widget detrás del juego (fondo Flutter)
+        backgroundBuilder: (context) => Container(
+          color: Colors.green,
+      ),
+      // overlayBuilderMap: define overlays (capas UI) que se pueden mostrar/ocultar
+      overlayBuilderMap: {
+        'PauseMenu': (BuildContext context, SpaceShooterGame game) {
+          return Center(
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              color: Colors.black54,
+              child: const Text(
+                'PAUSA',
+                style: TextStyle(fontSize: 40, color: Colors.white),
+              ),
+            ),
+          );
+        },
+      },
+    ),
+  );
 }
 
 class SpaceShooterGame extends FlameGame // Clase principal que hereda de FlameGame
@@ -63,7 +90,7 @@ class Player extends SpriteAnimationComponent // Clase del jugador que puede mos
     with HasGameReference<SpaceShooterGame> { // Permite acceder a referencias del juego
   Player() // Constructor del jugador
     : super(
-        size: Vector2(100, 150), // Tamaño: 100 de ancho, 150 de alto
+        size: Vector2(120, 82), // Tamaño proporcional al Gorila (752:512 ≈ 1.47:1)
         anchor: Anchor.center, // El punto central del sprite está en el centro
       );
 
@@ -74,11 +101,11 @@ class Player extends SpriteAnimationComponent // Clase del jugador que puede mos
     await super.onLoad(); // Llama al método onLoad de la clase padre
 
     animation = await game.loadSpriteAnimation( // Carga la animación del jugador
-      'player.png', // Archivo de imagen que contiene todos los frames de la animación
+      'Gorila.png', // Archivo de imagen del gorila
       SpriteAnimationData.sequenced( // Configura cómo se anima la imagen
-        amount: 4, // La animación tiene 4 frames (4 imágenes diferentes)
-        stepTime: 0.2, // Cada frame dura 0.2 segundos (5 frames por segundo)
-        textureSize: Vector2(32, 48), // Tamaño de cada frame en píxeles (32x48)
+        amount: 1, // 1 frame (imagen estática)
+        stepTime: 1, // Tiempo entre frames (irrelevante con 1 solo frame)
+        textureSize: Vector2(752, 512), // Tamaño de la imagen completa (752x512 px)
       ),
     );
 
@@ -173,7 +200,7 @@ class Enemy extends SpriteAnimationComponent // Clase de los enemigos que pueden
     await super.onLoad(); // Llama al método onLoad de la clase padre
 
     animation = await game.loadSpriteAnimation( // Carga la animación del enemigo
-      'enemy.png', // Archivo de imagen que contiene los frames de la animación
+      'platanobien.png', // Archivo de imagen que contiene los frames de la animación
       SpriteAnimationData.sequenced( // Configura cómo se anima la imagen
         amount: 4, // La animación tiene 4 frames
         stepTime: 0.2, // Cada frame dura 0.2 segundos
