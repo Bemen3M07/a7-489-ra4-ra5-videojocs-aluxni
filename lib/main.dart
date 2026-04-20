@@ -352,6 +352,7 @@ class Enemy extends SpriteAnimationComponent
       ),
     );
 //cambio para commit
+//cambio apra commit 2
     add(RectangleHitbox()); 
   }
 
