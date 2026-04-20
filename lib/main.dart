@@ -60,6 +60,7 @@ class MainMenuScreen extends StatelessWidget {
               onPressed: () => Navigator.push(
                   context,
                   MaterialPageRoute(
+                      //esto significa que al presionar el botón, se navega a una nueva pantalla usando la función Navigator.push. La nueva pantalla se crea con MaterialPageRoute, que toma un builder que devuelve la instancia de SettingsScreen.
                       builder: (context) => const SettingsScreen())),
               child:
                   const Text('Configuraciones', style: TextStyle(fontSize: 24)),
