@@ -7,14 +7,173 @@ import 'package:flame/input.dart'; // Importa funciones para detectar entrada de
 import 'package:flame/parallax.dart'; // Importa componente de efecto parallax (fondos en movimiento)
 import 'package:flutter/material.dart'; // Importa componentes básicos de Flutter (UI)
 
-void main() { // Punto de entrada principal del programa
-  runApp(GameWidget(game: SpaceShooterGame())); // Inicia la app con el widget del juego
+void main() {
+  runApp(const SpaceShooterApp());
 }
 
-class SpaceShooterGame extends FlameGame // Clase principal que hereda de FlameGame
-    with PanDetector, HasCollisionDetection { // Detecta gestos de arrastre y colisiones
-  late Player player; // Declara una variable que guardará al jugador
+// --- APLICACIÓN PRINCIPAL DE FLUTTER ---
+class SpaceShooterApp extends StatelessWidget {
+  const SpaceShooterApp({super.key});
 
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Space Shooter',
+      theme: ThemeData.dark(), // Tema oscuro por defecto
+      home: const MainMenuScreen(), // La primera pantalla es el menú
+    );
+  }
+}
+
+// --- PANTALLA DE INICIO (MENÚ PRINCIPAL) ---
+class MainMenuScreen extends StatelessWidget {
+  const MainMenuScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('GORILA SHOOTER', style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: Colors.white)),
+            const SizedBox(height: 50),
+            ElevatedButton(
+              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const LevelSelectionScreen())),
+              child: const Text('Jugar', style: TextStyle(fontSize: 24)),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsScreen())),
+              child: const Text('Configuraciones', style: TextStyle(fontSize: 24)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// --- PANTALLA DE SELECTOR DE NIVEL ---
+class LevelSelectionScreen extends StatelessWidget {
+  const LevelSelectionScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Selecciona un Nivel'), backgroundColor: Colors.black),
+      backgroundColor: Colors.black87,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              // Nivel 1: Fácil
+              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const GameScreen(nivel: 1))),
+              child: const Text('Nivel 1 (Fácil)', style: TextStyle(fontSize: 24)),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              // Nivel 2: Difícil (más rápido)
+              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const GameScreen(nivel: 2))),
+              child: const Text('Nivel 2 (Difícil)', style: TextStyle(fontSize: 24)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// --- PANTALLA DE CONFIGURACIONES ---
+class SettingsScreen extends StatelessWidget {
+  const SettingsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Configuraciones'), backgroundColor: Colors.black),
+      backgroundColor: Colors.black87,
+      body: const Center(
+        child: Text('Aquí puedes añadir volumen, controles, etc.', style: TextStyle(fontSize: 20, color: Colors.white)),
+      ),
+    );
+  }
+}
+
+// --- CONTENEDOR DEL JUEGO FLAME ---
+class GameScreen extends StatelessWidget {
+  final int nivel; // Recibimos el nivel seleccionado
+
+  const GameScreen({super.key, required this.nivel});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: GameWidget(
+        // Le pasamos el nivel al juego para ajustar la dificultad
+        game: SpaceShooterGame(nivel: nivel), 
+        loadingBuilder: (context) => const Center(child: CircularProgressIndicator()),
+        backgroundBuilder: (context) => Container(color: Colors.green),
+        overlayBuilderMap: {
+          'PauseMenu': (BuildContext context, SpaceShooterGame game) {
+            return GestureDetector(
+              onTap: () {
+                game.overlays.remove('PauseMenu');
+                game.resumeEngine();
+              },
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  color: Colors.black54,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text('PAUSA', style: TextStyle(fontSize: 40, color: Colors.white)),
+                      const SizedBox(height: 20),
+                      const Text('(Toca para continuar)', style: TextStyle(fontSize: 20, color: Colors.white70)),
+                      const SizedBox(height: 20),
+                      // Botón para salir al menú principal
+                      ElevatedButton(
+                        onPressed: () {
+                          game.resumeEngine();
+                          // Navega hacia atrás hasta llegar al menú principal
+                          Navigator.popUntil(context, (route) => route.isFirst); 
+                        },
+                        child: const Text('Salir al Menú'),
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        },
+      ),
+    );
+  }
+}
+
+class SpaceShooterGame extends FlameGame 
+    with PanDetector, DoubleTapDetector, HasCollisionDetection { 
+  late Player player;
+  
+  // --- NUEVO: Recibimos el nivel ---
+  final int nivel;
+  SpaceShooterGame({this.nivel = 1}); // Por defecto es 1
+
+  @override
+  void onDoubleTap() {
+    if (paused) {
+      overlays.remove('PauseMenu'); 
+      resumeEngine();               
+    } else {
+      overlays.add('PauseMenu');    
+      pauseEngine();                
+    }
+  }
   @override
   Future<void> onLoad() async { // Método que se ejecuta cuando carga todo el juego
     final parallax = await loadParallaxComponent( // Carga el fondo con efecto parallax (capas que se mueven a diferentes velocidades)
@@ -63,7 +222,7 @@ class Player extends SpriteAnimationComponent // Clase del jugador que puede mos
     with HasGameReference<SpaceShooterGame> { // Permite acceder a referencias del juego
   Player() // Constructor del jugador
     : super(
-        size: Vector2(100, 150), // Tamaño: 100 de ancho, 150 de alto
+        size: Vector2(120, 82), // Tamaño proporcional al Gorila (752:512 ≈ 1.47:1)
         anchor: Anchor.center, // El punto central del sprite está en el centro
       );
 
@@ -74,11 +233,11 @@ class Player extends SpriteAnimationComponent // Clase del jugador que puede mos
     await super.onLoad(); // Llama al método onLoad de la clase padre
 
     animation = await game.loadSpriteAnimation( // Carga la animación del jugador
-      'player.png', // Archivo de imagen que contiene todos los frames de la animación
+      'Gorila.png', // Archivo de imagen del gorila
       SpriteAnimationData.sequenced( // Configura cómo se anima la imagen
-        amount: 4, // La animación tiene 4 frames (4 imágenes diferentes)
-        stepTime: 0.2, // Cada frame dura 0.2 segundos (5 frames por segundo)
-        textureSize: Vector2(32, 48), // Tamaño de cada frame en píxeles (32x48)
+        amount: 1, // 1 frame (imagen estática)
+        stepTime: 1, // Tiempo entre frames (irrelevante con 1 solo frame)
+        textureSize: Vector2(752, 512), // Tamaño de la imagen completa (752x512 px)
       ),
     );
 
@@ -103,8 +262,16 @@ class Player extends SpriteAnimationComponent // Clase del jugador que puede mos
     game.add(_bulletSpawner); // Añade el generador de balas al juego
   }
 
-  void move(Vector2 delta) { // Método para mover el jugador
-    position.add(delta); // Suma el movimiento a la posición actual
+void move(Vector2 delta) { 
+    position.add(delta); 
+    // Si el movimiento es a la derecha (positivo), escala normal
+    if (delta.x > 0) {
+      scale.x = 1.0; 
+    } 
+    // Si el movimiento es a la izquierda (negativo), escala invertida (espejo)
+    else if (delta.x < 0) {
+      scale.x = -1.0; 
+    }
   }
 
   void startShooting() { // Método para comenzar a disparar
@@ -157,41 +324,50 @@ class Bullet extends SpriteAnimationComponent // Clase de las balas que pueden t
   }
 }
 
-class Enemy extends SpriteAnimationComponent // Clase de los enemigos que pueden tener animación
-    with HasGameReference<SpaceShooterGame>, CollisionCallbacks { // Permite acceder al juego y detectar colisiones
-  Enemy({ // Constructor del enemigo
-    super.position, // Recibe la posición inicial como parámetro
+class Enemy extends SpriteAnimationComponent 
+    with HasGameReference<SpaceShooterGame>, CollisionCallbacks { 
+  
+  final int nivel; // Guarda el nivel actual
+
+  Enemy({ 
+    super.position,
+    this.nivel = 1, // Recibe el nivel en el constructor
   }) : super(
-         size: Vector2.all(enemySize), // Tamaño: enemySize por enemySize (cuadrado)
-         anchor: Anchor.center, // El punto central del sprite está en el centro
+         size: Vector2.all(enemySize), 
+         anchor: Anchor.center, 
        );
 
-  static const enemySize = 50.0; // Constante: tamaño del enemigo (50x50 píxeles)
+  static const enemySize = 50.0; 
 
   @override
-  Future<void> onLoad() async { // Se ejecuta cuando carga el enemigo en el juego
-    await super.onLoad(); // Llama al método onLoad de la clase padre
+  Future<void> onLoad() async { 
+    await super.onLoad(); 
 
-    animation = await game.loadSpriteAnimation( // Carga la animación del enemigo
-      'enemy.png', // Archivo de imagen que contiene los frames de la animación
-      SpriteAnimationData.sequenced( // Configura cómo se anima la imagen
-        amount: 4, // La animación tiene 4 frames
-        stepTime: 0.2, // Cada frame dura 0.2 segundos
-        textureSize: Vector2.all(16), // Tamaño de cada frame (16x16 píxeles)
+    animation = await game.loadSpriteAnimation(
+      'platanobien.png',
+      SpriteAnimationData.sequenced(
+        amount: 1, 
+        stepTime: 1, 
+        textureSize: Vector2(360, 360), 
       ),
     );
 
-    add(RectangleHitbox()); // Añade una caja rectangular para detectar colisiones
+    add(RectangleHitbox()); 
   }
 
   @override
-  void update(double dt) { // Se ejecuta cada frame para actualizar el enemigo
-    super.update(dt); // Llama al update de la clase padre
-
-    position.y += dt * 250; // Mueve el enemigo hacia abajo (250 píxeles por segundo)
-
-    if (position.y > game.size.y) { // Si el enemigo salió por la parte inferior de la pantalla
-      removeFromParent(); // Elimina el enemigo del juego
+  void update(double dt) {
+    super.update(dt);
+    
+    // --- NUEVO: Velocidad basada en el nivel ---
+    // Nivel 1 = 250 px/s, Nivel 2 = 400 px/s
+    double velocidadCaida = (nivel == 1) ? 250 : 400;
+    
+    position.y += dt * velocidadCaida; 
+    angle += 5 * dt; 
+    
+    if (position.y > game.size.y) {
+      removeFromParent();
     }
   }
 
