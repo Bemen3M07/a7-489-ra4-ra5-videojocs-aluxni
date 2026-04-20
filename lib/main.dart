@@ -209,7 +209,7 @@ class Enemy extends SpriteAnimationComponent // Clase de los enemigos que pueden
     }
   }
 }
-
+// La clase Enemy detecta colisiones con balas. Cuando un enemigo colisiona con una bala, ambos se eliminan del juego y se crea una explosión en la posición del enemigo. Esto se logra mediante el método onCollisionStart, que verifica si el otro objeto es una instancia de Bullet y luego realiza las acciones correspondientes.
 class Explosion extends SpriteAnimationComponent // Clase de las explosiones que tienen animación
     with HasGameReference<SpaceShooterGame> { // Permite acceder a referencias del juego
   Explosion({ // Constructor de la explosión
