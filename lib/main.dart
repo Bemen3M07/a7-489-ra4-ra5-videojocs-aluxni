@@ -219,7 +219,7 @@ class Explosion extends SpriteAnimationComponent // Clase de las explosiones que
          anchor: Anchor.center, // El punto central del sprite está en el centro
          removeOnFinish: true, // Se elimina automáticamente cuando termina la animación
        );
-
+// La propiedad removeOnFinish hace que el componente se elimine del juego automáticamente cuando la animación termine, lo que es ideal para efectos como explosiones que solo deben mostrarse una vez.
   @override
   Future<void> onLoad() async { // Se ejecuta cuando carga la explosión en el juego
     await super.onLoad(); // Llama al método onLoad de la clase padre
