@@ -56,6 +56,7 @@ class MainMenuScreen extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             ElevatedButton(
+              // Botón para ir a la pantalla de configuraciones
               onPressed: () => Navigator.push(
                   context,
                   MaterialPageRoute(
