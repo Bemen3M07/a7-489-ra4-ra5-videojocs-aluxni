@@ -351,7 +351,7 @@ class Enemy extends SpriteAnimationComponent
         textureSize: Vector2(360, 360), 
       ),
     );
-
+//cambio para commit
     add(RectangleHitbox()); 
   }
 
