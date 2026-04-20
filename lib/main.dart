@@ -40,6 +40,7 @@ class MainMenuScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            //en el menú tenemos un título y dos botones para jugar o ir a configuraciones
             const Text('GORILA SHOOTER',
                 style: TextStyle(
                     fontSize: 40,
